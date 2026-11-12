@@ -1,20 +1,19 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
 import {
-  Menu,
-  LayoutDashboard,
-  PlusSquare,
-  ListVideo,
   CalendarDays,
+  LayoutDashboard,
+  ListVideo,
   LogOut,
+  Menu,
+  PlusSquare,
 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/theme-toggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +21,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const NAV_LINKS = [
@@ -41,7 +39,6 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 md:px-8 flex h-16 items-center justify-between">
-        
         {/* LEFT: Dual Logo Setup */}
         <Link href="/" className="flex items-center gap-2">
           {/* Adjusted to a wide rectangle (h-10 w-52) to fit the new text-integrated logo perfectly */}
@@ -102,27 +99,48 @@ export function Navbar() {
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer font-medium">
-                      <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/add-studio" className="cursor-pointer font-medium">
-                      <PlusSquare className="mr-2 h-4 w-4" /> Add New Studio
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/my-listings" className="cursor-pointer font-medium">
-                      <ListVideo className="mr-2 h-4 w-4" /> My Studio Listings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/my-bookings" className="cursor-pointer font-medium">
-                      <CalendarDays className="mr-2 h-4 w-4" /> My Bookings
-                    </Link>
-                  </DropdownMenuItem>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuItem
+                    render={
+                      <Link
+                        href="/dashboard"
+                        className="cursor-pointer font-medium"
+                      >
+                        <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                      </Link>
+                    }
+                  />
+                  <DropdownMenuItem
+                    render={
+                      <Link
+                        href="/add-studio"
+                        className="cursor-pointer font-medium"
+                      >
+                        <PlusSquare className="mr-2 h-4 w-4" /> Add New Studio
+                      </Link>
+                    }
+                  />
+                  <DropdownMenuItem
+                    render={
+                      <Link
+                        href="/my-listings"
+                        className="cursor-pointer font-medium"
+                      >
+                        <ListVideo className="mr-2 h-4 w-4" /> My Studio
+                        Listings
+                      </Link>
+                    }
+                  />
+                  <DropdownMenuItem
+                    render={
+                      <Link
+                        href="/my-bookings"
+                        className="cursor-pointer font-medium"
+                      >
+                        <CalendarDays className="mr-2 h-4 w-4" /> My Bookings
+                      </Link>
+                    }
+                  />
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-red-600 cursor-pointer font-medium">
                     <LogOut className="mr-2 h-4 w-4" /> Logout
@@ -131,10 +149,17 @@ export function Navbar() {
               </DropdownMenu>
             ) : (
               <>
-                <Button variant="ghost" asChild className="font-medium hover:text-indigo-600">
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="font-medium hover:text-indigo-600"
+                >
                   <Link href="/login">Login</Link>
                 </Button>
-                <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium">
+                <Button
+                  asChild
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+                >
                   <Link href="/register">Register</Link>
                 </Button>
               </>
@@ -163,17 +188,33 @@ export function Navbar() {
               <div className="mt-auto flex flex-col gap-4 border-t pt-6">
                 {isAuthenticated ? (
                   <>
-                    <Link href="/dashboard" className="flex items-center text-lg font-medium">
-                      <LayoutDashboard className="mr-2 h-5 w-5 text-indigo-600" /> Dashboard
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center text-lg font-medium"
+                    >
+                      <LayoutDashboard className="mr-2 h-5 w-5 text-indigo-600" />{" "}
+                      Dashboard
                     </Link>
-                    <Link href="/add-studio" className="flex items-center text-lg font-medium">
-                      <PlusSquare className="mr-2 h-5 w-5 text-indigo-600" /> Add New Studio
+                    <Link
+                      href="/add-studio"
+                      className="flex items-center text-lg font-medium"
+                    >
+                      <PlusSquare className="mr-2 h-5 w-5 text-indigo-600" />{" "}
+                      Add New Studio
                     </Link>
-                    <Link href="/my-listings" className="flex items-center text-lg font-medium">
-                      <ListVideo className="mr-2 h-5 w-5 text-indigo-600" /> My Listings
+                    <Link
+                      href="/my-listings"
+                      className="flex items-center text-lg font-medium"
+                    >
+                      <ListVideo className="mr-2 h-5 w-5 text-indigo-600" /> My
+                      Listings
                     </Link>
-                    <Link href="/my-bookings" className="flex items-center text-lg font-medium">
-                      <CalendarDays className="mr-2 h-5 w-5 text-indigo-600" /> My Bookings
+                    <Link
+                      href="/my-bookings"
+                      className="flex items-center text-lg font-medium"
+                    >
+                      <CalendarDays className="mr-2 h-5 w-5 text-indigo-600" />{" "}
+                      My Bookings
                     </Link>
                     <Button variant="destructive" className="w-full mt-4">
                       Logout
@@ -184,7 +225,10 @@ export function Navbar() {
                     <Button variant="outline" asChild className="w-full">
                       <Link href="/login">Login</Link>
                     </Button>
-                    <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700">
+                    <Button
+                      asChild
+                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                    >
                       <Link href="/register">Register</Link>
                     </Button>
                   </>
