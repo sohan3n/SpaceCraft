@@ -149,19 +149,14 @@ export function Navbar() {
               </DropdownMenu>
             ) : (
               <>
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="font-medium hover:text-indigo-600"
-                >
-                  <Link href="/login">Login</Link>
-                </Button>
-                <Button
-                  asChild
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
-                >
-                  <Link href="/register">Register</Link>
-                </Button>
+                <Link href="/login">
+                  <Button variant="ghost">Login</Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                    Register
+                  </Button>
+                </Link>
               </>
             )}
           </div>
@@ -222,15 +217,14 @@ export function Navbar() {
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" asChild className="w-full">
-                      <Link href="/login">Login</Link>
-                    </Button>
-                    <Button
-                      asChild
-                      className="w-full bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      <Link href="/register">Register</Link>
-                    </Button>
+                    <Link href="/login">
+                      <Button variant="ghost">Login</Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                        Register
+                      </Button>
+                    </Link>
                   </>
                 )}
               </div>

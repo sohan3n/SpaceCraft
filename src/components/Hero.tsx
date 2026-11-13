@@ -99,25 +99,25 @@ export function Hero() {
 
                   {/* Primary & Secondary CTA Buttons */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                    <Button
-                      asChild
-                      size="lg"
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium h-12 px-7 text-base"
-                    >
-                      <Link href="/studios">
+                    <Link href="/studios">
+                      <Button
+                        size="lg"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium h-12 px-7 text-base"
+                      >
                         Explore Studios
                         <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
+                      </Button>
+                    </Link>
 
-                    <Button
-                      asChild
-                      size="lg"
-                      variant="outline"
-                      className="border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm font-medium h-12 px-7 text-base"
-                    >
-                      <Link href="/add-studio">Host Your Space</Link>
-                    </Button>
+                    <Link href="/add-studio">
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm font-medium h-12 px-7 text-base"
+                      >
+                        Host Your Space
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>

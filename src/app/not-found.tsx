@@ -28,27 +28,23 @@ export default function NotFound() {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        <Button
-          asChild
-          variant="outline"
-          className="gap-2 w-full sm:w-auto h-11 px-6"
-        >
-          {/* Using window.history.back() behavior via a standard href fallback for simplicity, 
-              though a router.back() could be used in a Client Component if preferred */}
-          <Link href="/">
+        {/* Using window.history.back() behavior via a standard href fallback for simplicity,
+            though a router.back() could be used in a Client Component if preferred */}
+        <Link href="/">
+          <Button
+            variant="outline"
+            className="gap-2 w-full sm:w-auto h-11 px-6"
+          >
             <ArrowLeft className="h-4 w-4" />
             Go Back
-          </Link>
-        </Button>
-        <Button
-          asChild
-          className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white w-full sm:w-auto h-11 px-6"
-        >
-          <Link href="/">
+          </Button>
+        </Link>
+        <Link href="/">
+          <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white w-full sm:w-auto h-11 px-6">
             <Home className="h-4 w-4" />
             Return Home
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
     </div>
   );

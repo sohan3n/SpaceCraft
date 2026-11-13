@@ -53,9 +53,11 @@ export function StudioCard({ id, title, category, price, rating, location, image
             <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">${price}</span>
             <span className="text-xs font-medium text-muted-foreground">/ hr</span>
           </div>
-          <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
-            <Link href={`/studios/${id}`}>View Details</Link>
-          </Button>
+          <Link href={`/studios/${id}`}>
+            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              View Details
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
