@@ -3,25 +3,52 @@ import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+export interface Studio {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  hourlyRate: number;
+  capacity: number;
+  amenities: string[];
+  images: string[];
+  hostId: string;
+  hostName: string;
+  createdAt?: string;
+}
+
 export interface StudioCardProps {
   id: string;
   title: string;
   category: string;
   price: number;
-  rating: number;
+  rating?: number;
   location: string;
   image: string;
 }
 
-export function StudioCard({ id, title, category, price, rating, location, image }: StudioCardProps) {
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80";
+
+export function StudioCard({
+  id,
+  title,
+  category,
+  price,
+  rating = 4.9,
+  location,
+  image,
+}: StudioCardProps) {
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-indigo-500/50">
       {/* Image Container with Badges */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         <Image
-          src={image}
+          src={image || FALLBACK_IMAGE}
           alt={title}
           fill
+          unoptimized
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
         {/* Category Badge */}
@@ -42,7 +69,7 @@ export function StudioCard({ id, title, category, price, rating, location, image
             {title}
           </h3>
         </div>
-        
+
         <div className="mb-4 flex items-center text-sm text-muted-foreground">
           <MapPin className="mr-1 h-4 w-4 shrink-0" />
           <span className="truncate">{location}</span>
@@ -50,7 +77,9 @@ export function StudioCard({ id, title, category, price, rating, location, image
 
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-border/50">
           <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">${price}</span>
+            <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
+              ${price}
+            </span>
             <span className="text-xs font-medium text-muted-foreground">/ hr</span>
           </div>
           <Link href={`/studios/${id}`}>

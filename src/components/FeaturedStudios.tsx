@@ -1,95 +1,104 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { StudioCard } from "@/components/StudioCard";
+"use client";
 
-const MOCK_STUDIOS = [
-  {
-    id: "1",
-    title: "Apex Daylight Cyc Wall",
-    category: "Photo Studios",
-    price: 85,
-    rating: 4.9,
-    location: "Downtown Arts District",
-    image: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: "2",
-    title: "Echo Sound Stage A",
-    category: "Sound Stages",
-    price: 150,
-    rating: 5.0,
-    location: "Westside Production Hub",
-    image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: "3",
-    title: "The Vocal Booth Pro",
-    category: "Podcast Rooms",
-    price: 45,
-    rating: 4.8,
-    location: "Midtown Media Center",
-    image: "https://images.unsplash.com/photo-1589903308904-1010c2294adc?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: "4",
-    title: "Neon Glow Creative Room",
-    category: "Art Workshops",
-    price: 60,
-    rating: 4.7,
-    location: "East End Lofts",
-    image: "https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: "5",
-    title: "Symphony Mixing Suite",
-    category: "Music Suites",
-    price: 95,
-    rating: 4.9,
-    location: "Uptown Records Building",
-    image: "https://images.unsplash.com/photo-1598653222000-6b7b7a552625?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    id: "6",
-    title: "Lumina Lifestyle Setup",
-    category: "Photo Studios",
-    price: 75,
-    rating: 4.6,
-    location: "Downtown Arts District",
-    image: "https://images.unsplash.com/photo-1611093791822-15086535830b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
-  },
-];
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowRight, Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { StudioCard, type Studio } from "@/components/StudioCard";
 
 export function FeaturedStudios() {
+  const [studios, setStudios] = useState<Studio[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadFeaturedStudios() {
+      try {
+        const res = await fetch("http://localhost:5000/api/studios?limit=6");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.studios)) {
+          setStudios(data.studios);
+        }
+      } catch (error) {
+        console.error("Failed to load featured studios:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadFeaturedStudios();
+  }, []);
+
   return (
-    <section className="w-full bg-zinc-50 dark:bg-zinc-900/20 py-16 md:py-24">
-      <div className="container mx-auto px-4 md:px-8">
-        
+    <section className="py-20 bg-background">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-          <div className="space-y-2">
+        <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
             <h2 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-              Featured Spaces
+              Featured Studios
             </h2>
-            <p className="text-muted-foreground text-lg max-w-xl">
-              Explore top-rated studios handpicked for your next creative project.
+            <p className="mt-2 text-muted-foreground">
+              Handpicked creative spaces ready for your next shoot, session, or recording.
             </p>
           </div>
-          <Link 
-            href="/studios" 
-            className="group flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
-          >
-            Browse all studios
-            <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <Link href="/studios">
+            <Button variant="outline" className="gap-2">
+              View All Studios
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </Link>
         </div>
 
-        {/* 6-Card Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {MOCK_STUDIOS.map((studio) => (
-            <StudioCard key={studio.id} {...studio} />
-          ))}
-        </div>
-
+        {/* Loading Skeletons */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="overflow-hidden rounded-2xl border bg-card shadow-sm"
+              >
+                <div className="aspect-[4/3] w-full animate-pulse bg-muted" />
+                <div className="space-y-3 p-5">
+                  <div className="h-5 w-2/3 animate-pulse rounded bg-muted" />
+                  <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+                  <div className="pt-4 border-t border-border/50 flex justify-between">
+                    <div className="h-6 w-16 animate-pulse rounded bg-muted" />
+                    <div className="h-8 w-24 animate-pulse rounded bg-muted" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : studios.length === 0 ? (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-12 text-center">
+            <Building2 className="h-10 w-10 text-muted-foreground mb-3" />
+            <h3 className="font-heading text-lg font-semibold">No studios listed yet</h3>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground">
+              Be the first host to list a creative workspace on SpaceCraft.
+            </p>
+            <Link href="/add-studio" className="mt-5">
+              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                List Your Space
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          /* Live Studio Cards Grid */
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {studios.map((studio) => (
+              <StudioCard
+                key={studio._id}
+                id={studio._id}
+                title={studio.title}
+                category={studio.category}
+                price={studio.hourlyRate}
+                location={studio.location}
+                image={studio.images?.[0] || ""}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
