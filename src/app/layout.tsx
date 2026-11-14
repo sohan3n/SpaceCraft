@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { Suspense } from "react";
 
 // 1. Configure standard body font
 const inter = Inter({
@@ -42,7 +43,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
+          <Suspense
+            fallback={
+              <header className="h-16 w-full border-b bg-background/80" />
+            }
+          >
+            <Navbar />
+          </Suspense>
           {children}
           <Footer />
           <Toaster position="bottom-right" richColors />
