@@ -1,16 +1,9 @@
 "use client";
 
-import {
-  CalendarDays,
-  LayoutDashboard,
-  ListVideo,
-  LogOut,
-  Menu,
-  PlusSquare,
-} from "lucide-react";
+import { ListVideo, LogOut, Menu, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ModeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -18,10 +11,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { signOut, useSession } from "@/lib/auth-client";
+import { getInitials } from "@/lib/utils";
 
 const NAV_LINKS = [
   { name: "Home", href: "/" },
@@ -32,9 +28,20 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  // MOCK AUTH STATE
-  const isAuthenticated = false;
+  // REAL SESSION STATE via BetterAuth
+  const { data, isPending } = useSession();
+  const user = data?.user;
+  const isAuthenticated = Boolean(user);
+
+  async function handleSignOut() {
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => router.push("/"),
+      },
+    });
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -88,62 +95,66 @@ export function Navbar() {
 
           {/* Desktop Auth States */}
           <div className="hidden md:flex items-center gap-4">
-            {isAuthenticated ? (
+            {isPending ? (
+              // Avoid flashing the Login/Register buttons while the session loads
+              <div
+                className="h-9 w-28 animate-pulse rounded-md bg-muted"
+                aria-hidden="true"
+              />
+            ) : isAuthenticated && user ? (
               <DropdownMenu>
-                {/* FIXED: Removed asChild and <Button> to prevent <button> inside <button> hydration crashes */}
-                <DropdownMenuTrigger className="relative h-10 w-10 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
-                  <Avatar className="h-10 w-10 border border-border hover:opacity-80 transition-opacity">
-                    <AvatarImage src="" alt="@user" />
-                    <AvatarFallback className="bg-indigo-100 text-indigo-700 font-heading font-bold">
-                      US
+                <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-input bg-background py-1 pr-3 pl-1 transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
+                  <Avatar className="h-7 w-7 border border-border">
+                    <AvatarImage
+                      src={user.image ?? undefined}
+                      alt={user.name}
+                    />
+                    <AvatarFallback className="bg-indigo-100 text-xs font-heading font-bold text-indigo-700">
+                      {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
+                  <span className="max-w-28 truncate text-sm font-medium">
+                    {user.name}
+                  </span>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuContent className="w-64" align="end">
+                  {/* Dropdown header: display name & email */}
+                  <DropdownMenuLabel className="px-2 py-1.5">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {user.name}
+                    </p>
+                    <p className="truncate text-xs font-normal text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     render={
                       <Link
-                        href="/dashboard"
+                        href="/profile"
                         className="cursor-pointer font-medium"
                       >
-                        <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                        <User className="mr-2 h-4 w-4" /> Profile Settings
                       </Link>
                     }
                   />
                   <DropdownMenuItem
                     render={
                       <Link
-                        href="/add-studio"
+                        href="/my-studios"
                         className="cursor-pointer font-medium"
                       >
-                        <PlusSquare className="mr-2 h-4 w-4" /> Add New Studio
-                      </Link>
-                    }
-                  />
-                  <DropdownMenuItem
-                    render={
-                      <Link
-                        href="/my-listings"
-                        className="cursor-pointer font-medium"
-                      >
-                        <ListVideo className="mr-2 h-4 w-4" /> My Studio
-                        Listings
-                      </Link>
-                    }
-                  />
-                  <DropdownMenuItem
-                    render={
-                      <Link
-                        href="/my-bookings"
-                        className="cursor-pointer font-medium"
-                      >
-                        <CalendarDays className="mr-2 h-4 w-4" /> My Bookings
+                        <ListVideo className="mr-2 h-4 w-4" /> My Studios
                       </Link>
                     }
                   />
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600 cursor-pointer font-medium">
-                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                  <DropdownMenuItem
+                    variant="destructive"
+                    className="cursor-pointer font-medium"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" /> Log Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -181,38 +192,47 @@ export function Navbar() {
                 ))}
               </nav>
               <div className="mt-auto flex flex-col gap-4 border-t pt-6">
-                {isAuthenticated ? (
+                {isPending ? null : isAuthenticated && user ? (
                   <>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9 border border-border">
+                        <AvatarImage
+                          src={user.image ?? undefined}
+                          alt={user.name}
+                        />
+                        <AvatarFallback className="bg-indigo-100 text-xs font-heading font-bold text-indigo-700">
+                          {getInitials(user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">
+                          {user.name}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
                     <Link
-                      href="/dashboard"
+                      href="/profile"
                       className="flex items-center text-lg font-medium"
                     >
-                      <LayoutDashboard className="mr-2 h-5 w-5 text-indigo-600" />{" "}
-                      Dashboard
+                      <User className="mr-2 h-5 w-5 text-indigo-600" /> Profile
+                      Settings
                     </Link>
                     <Link
-                      href="/add-studio"
-                      className="flex items-center text-lg font-medium"
-                    >
-                      <PlusSquare className="mr-2 h-5 w-5 text-indigo-600" />{" "}
-                      Add New Studio
-                    </Link>
-                    <Link
-                      href="/my-listings"
+                      href="/my-studios"
                       className="flex items-center text-lg font-medium"
                     >
                       <ListVideo className="mr-2 h-5 w-5 text-indigo-600" /> My
-                      Listings
+                      Studios
                     </Link>
-                    <Link
-                      href="/my-bookings"
-                      className="flex items-center text-lg font-medium"
+                    <Button
+                      variant="destructive"
+                      className="w-full mt-4"
+                      onClick={handleSignOut}
                     >
-                      <CalendarDays className="mr-2 h-5 w-5 text-indigo-600" />{" "}
-                      My Bookings
-                    </Link>
-                    <Button variant="destructive" className="w-full mt-4">
-                      Logout
+                      Log Out
                     </Button>
                   </>
                 ) : (
