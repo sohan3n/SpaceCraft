@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -118,15 +119,18 @@ export function Navbar() {
                   </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64" align="end">
-                  {/* Dropdown header: display name & email */}
-                  <DropdownMenuLabel className="px-2 py-1.5">
-                    <p className="truncate text-sm font-semibold text-foreground">
-                      {user.name}
-                    </p>
-                    <p className="truncate text-xs font-normal text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </DropdownMenuLabel>
+                  {/* Dropdown header: display name & email
+                      (GroupLabel requires a Menu.Group context — DropdownMenuGroup) */}
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="px-2 py-1.5">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {user.name}
+                      </p>
+                      <p className="truncate text-xs font-normal text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     render={
