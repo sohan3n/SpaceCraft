@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { GoogleIcon } from "@/components/google-icon";
@@ -26,7 +26,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signIn, signUp } from "@/lib/auth-client";
+import { signIn, signUp, useSession } from "@/lib/auth-client";
 
 // 1. Define the strict validation schema
 const registerSchema = z.object({
@@ -42,6 +42,14 @@ export default function RegisterPage() {
   const [globalError, setGlobalError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  // Client-side safety net: already-signed-in visitors leave /register
+  const { data: session, isPending } = useSession();
+  useEffect(() => {
+    if (!isPending && session) {
+      router.replace("/");
+    }
+  }, [isPending, session, router]);
 
   // 2. Initialize the form
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -90,7 +98,7 @@ export default function RegisterPage() {
     try {
       const { error } = await signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: "http://localhost:3000/",
       });
 
       if (error) {

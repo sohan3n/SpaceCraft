@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,9 @@ function formatMemberSince(value: unknown): string {
 }
 
 export default function ProfilePage() {
-  const { data, isPending } = useSession();
-  const user = data?.user;
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
 
   // Display name edit state
   const [name, setName] = useState("");
@@ -37,6 +39,13 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Client-side safety net: expired/missing session cookie → back to login
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.replace("/login");
+    }
+  }, [isPending, session, router]);
 
   // Keep the local input in sync with the session user
   useEffect(() => {
