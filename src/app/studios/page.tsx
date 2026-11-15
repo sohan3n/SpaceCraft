@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Building2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,23 +18,29 @@ const CATEGORIES = [
   "Art",
 ];
 
+function normalizeCategory(raw: string | null): string {
+  if (!raw) return "All";
+  const matched = CATEGORIES.find(
+    (cat) => cat.toLowerCase() === raw.trim().toLowerCase()
+  );
+  return matched || "All";
+}
+
 function StudiosCatalogContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category") || "All";
 
   const [studios, setStudios] = useState<Studio[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Sync if URL query ?category=... changes
-  useEffect(() => {
-    const paramCat = searchParams.get("category");
-    if (paramCat) {
-      setSelectedCategory(paramCat);
-    }
-  }, [searchParams]);
+  // The URL query is the SINGLE SOURCE OF TRUTH for the active category.
+  // Deriving it (instead of mirroring it into useState) guarantees the pill,
+  // the "Showing N studios in X" label and the fetched data can never drift
+  // apart, and makes a plain href="/studios" reset everything to "All".
+  const activeCategory = normalizeCategory(searchParams.get("category"));
 
   // Debounce search input by 300ms
   useEffect(() => {
@@ -44,26 +50,40 @@ function StudiosCatalogContent() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch filtered studios from Express backend
+  // Fetch filtered studios from Express backend.
+  // AbortController guarantees only the LATEST request may write state: when the
+  // category/search changes (or the component unmounts) the in-flight request is
+  // aborted, so a slow earlier response can never overwrite a newer one.
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchStudios() {
       setIsLoading(true);
       try {
         const params = new URLSearchParams();
-        if (selectedCategory && selectedCategory !== "All") {
-          params.set("category", selectedCategory);
+        if (activeCategory !== "All") {
+          params.set("category", activeCategory);
         }
         if (debouncedSearch.trim()) {
           params.set("search", debouncedSearch.trim());
         }
 
+        const apiBase =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         const queryString = params.toString();
-        const url = `http://localhost:5000/api/studios${
+        const url = `${apiBase}/api/studios${
           queryString ? `?${queryString}` : ""
         }`;
 
-        const res = await fetch(url);
+        // cache: "no-store" -> never reuse a cached response across switches.
+        const res = await fetch(url, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
         const data = await res.json();
+
+        // A newer request (or unmount) took over while we were awaiting.
+        if (controller.signal.aborted) return;
 
         if (data.success && Array.isArray(data.studios)) {
           setStudios(data.studios);
@@ -71,20 +91,42 @@ function StudiosCatalogContent() {
           setStudios([]);
         }
       } catch (error) {
+        // Ignore intentional aborts — a newer request owns the state now.
+        if (
+          controller.signal.aborted ||
+          (error instanceof DOMException && error.name === "AbortError")
+        ) {
+          return;
+        }
         console.error("Failed to fetch studios:", error);
         setStudios([]);
       } finally {
-        setIsLoading(false);
+        // Don't clear the spinner for an aborted run: the follow-up run has
+        // already set isLoading back to true and owns it now.
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchStudios();
-  }, [selectedCategory, debouncedSearch]);
+
+    return () => controller.abort();
+  }, [activeCategory, debouncedSearch]);
+
+  // Pills only touch the URL — the derived activeCategory above does the rest.
+  function handleSelectCategory(category: string) {
+    const nextUrl =
+      category === "All"
+        ? pathname
+        : `${pathname}?category=${encodeURIComponent(category)}`;
+    router.replace(nextUrl, { scroll: false });
+  }
 
   function clearFilters() {
-    setSelectedCategory("All");
     setSearchQuery("");
     setDebouncedSearch("");
+    router.replace(pathname, { scroll: false });
   }
 
   return (
@@ -138,13 +180,13 @@ function StudiosCatalogContent() {
             </span>
             {CATEGORIES.map((category) => {
               const active =
-                selectedCategory.toLowerCase() === category.toLowerCase();
+                activeCategory.toLowerCase() === category.toLowerCase();
               return (
                 <button
                   key={category}
                   type="button"
-                  onClick={() => setSelectedCategory(category)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
+                  onClick={() => handleSelectCategory(category)}
+                  className={`cursor-pointer rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
                     active
                       ? "bg-indigo-600 text-white shadow-sm"
                       : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -160,12 +202,18 @@ function StudiosCatalogContent() {
         {/* Results Count */}
         {!isLoading && (
           <div className="text-sm text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{studios.length}</span>{" "}
+            Showing{" "}
+            <span className="font-semibold text-foreground">
+              {studios.length}
+            </span>{" "}
             {studios.length === 1 ? "studio" : "studios"}
-            {selectedCategory !== "All" && (
+            {activeCategory !== "All" && (
               <>
                 {" "}
-                in <span className="font-semibold text-indigo-500">{selectedCategory}</span>
+                in{" "}
+                <span className="font-semibold text-indigo-500">
+                  {activeCategory}
+                </span>
               </>
             )}
           </div>
@@ -194,7 +242,9 @@ function StudiosCatalogContent() {
         ) : studios.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-14 text-center">
             <Building2 className="h-10 w-10 text-muted-foreground mb-3" />
-            <h2 className="font-heading text-xl font-semibold">No matching studios found</h2>
+            <h2 className="font-heading text-xl font-semibold">
+              No matching studios found
+            </h2>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
               Try adjusting your search keywords or switching back to all categories.
             </p>

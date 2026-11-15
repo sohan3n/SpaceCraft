@@ -4,7 +4,9 @@ import { type NextRequest, NextResponse } from "next/server";
  * Phase 1 route protection (Next.js 16 Proxy convention).
  *
  * - Guest-only pages (/login, /register) bounce authenticated users home.
- * - Protected pages (/profile, /add-studio, /my-studios) bounce guests to /login.
+ * - Protected pages (/profile, /add-studio, /my-studios, /dashboard,
+ *   /my-bookings) bounce guests to /login?callbackUrl=<pathname> so they
+ *   return to their intended route after signing in.
  * - "/" and "/studios" remain fully public (not matched at all).
  */
 
@@ -12,7 +14,13 @@ import { type NextRequest, NextResponse } from "next/server";
 const GUEST_ONLY_ROUTES = ["/login", "/register"];
 
 // Requires a session cookie to access
-const PROTECTED_ROUTES = ["/profile", "/add-studio", "/my-studios"];
+const PROTECTED_ROUTES = [
+  "/profile",
+  "/add-studio",
+  "/my-studios",
+  "/dashboard",
+  "/my-bookings",
+];
 
 // BetterAuth session cookie names:
 // - "better-auth.session_token"        → HTTP (localhost)
@@ -46,7 +54,11 @@ export function proxy(request: NextRequest) {
   // 2. Guests are not allowed on protected routes
   if (matchesRoute(pathname, PROTECTED_ROUTES)) {
     if (!hasSessionCookie) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      // Send the visitor to /login carrying their intended destination so they
+      // land back here after signing in (direct logins still default to "/").
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
     }
   }
 
@@ -60,5 +72,7 @@ export const config = {
     "/profile/:path*",
     "/add-studio/:path*",
     "/my-studios/:path*",
+    "/dashboard/:path*",
+    "/my-bookings/:path*",
   ],
 };

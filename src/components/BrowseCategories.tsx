@@ -1,43 +1,50 @@
 import Link from "next/link";
-import { 
-  Camera, 
-  Video, 
-  Mic, 
-  Music, 
+import {
+  Camera,
+  Mic,
+  Music,
+  Film,
+  Sparkles,
   Palette,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 
 const CATEGORIES = [
   {
-    title: "Photo Studios",
-    description: "Cycloramas & daylight spaces",
+    title: "Photography",
+    description: "Cycloramas & daylight lofts",
     icon: Camera,
-    href: "/studios?category=photo-studios",
+    href: "/studios?category=Photography",
   },
   {
-    title: "Sound Stages",
-    description: "Acoustically treated sets",
-    icon: Video,
-    href: "/studios?category=sound-stages",
-  },
-  {
-    title: "Podcast Rooms",
+    title: "Podcast",
     description: "Broadcast-ready audio suites",
     icon: Mic,
-    href: "/studios?category=podcast-rooms",
+    href: "/studios?category=Podcast",
   },
   {
-    title: "Music Suites",
+    title: "Music",
     description: "Recording & mixing booths",
     icon: Music,
-    href: "/studios?category=music-suites",
+    href: "/studios?category=Music",
   },
   {
-    title: "Art Workshops",
-    description: "Mess-friendly creative lofts",
+    title: "Film",
+    description: "Green screens & sound stages",
+    icon: Film,
+    href: "/studios?category=Film",
+  },
+  {
+    title: "Dance",
+    description: "Sprung floors & mirrored halls",
+    icon: Sparkles,
+    href: "/studios?category=Dance",
+  },
+  {
+    title: "Art",
+    description: "Sky-lit workshops & ateliers",
     icon: Palette,
-    href: "/studios?category=art-workshops",
+    href: "/studios?category=Art",
   },
 ];
 
@@ -45,7 +52,6 @@ export function BrowseCategories() {
   return (
     <section className="w-full bg-background py-16 md:py-24">
       <div className="container mx-auto px-4 md:px-8">
-        
         {/* Section Header */}
         <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div className="space-y-2">
@@ -56,8 +62,8 @@ export function BrowseCategories() {
               Find the perfect environment tailored to your production needs.
             </p>
           </div>
-          <Link 
-            href="/studios" 
+          <Link
+            href="/studios"
             className="group flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
           >
             View all spaces
@@ -65,8 +71,8 @@ export function BrowseCategories() {
           </Link>
         </div>
 
-        {/* Categories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
+        {/* 6 Categories Grid (3x2 on desktop) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {CATEGORIES.map((category) => {
             const Icon = category.icon;
             return (
@@ -90,7 +96,6 @@ export function BrowseCategories() {
             );
           })}
         </div>
-
       </div>
     </section>
   );

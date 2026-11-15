@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { GoogleIcon } from "@/components/google-icon";
@@ -33,11 +33,38 @@ const loginSchema = z.object({
   password: z.string().min(1, { message: "Password is required." }),
 });
 
-export default function LoginPage() {
+const FORGOT_NOTICE =
+  "Automated password reset emails are disabled in this demo environment so examiners can test freely. Please sign in with your registered credentials or Continue with Google.";
+
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [globalError, setGlobalError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showForgotNotice, setShowForgotNotice] = useState(false);
+
+  // Only safe, internal relative paths are honoured as post-login destinations
+  const rawCallback = searchParams.get("callbackUrl");
+  const redirectTo =
+    rawCallback?.startsWith("/") && !rawCallback.startsWith("//")
+      ? rawCallback
+      : "/";
+
+  // Surface any OAuth redirect error returned in ?error=...
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error");
+    if (authError === "unable_to_link_account") {
+      setGlobalError(
+        "Unable to link Google account. If you recently reset test users in MongoDB, clear the 'account' and 'session' collections and try again.",
+      );
+    } else if (authError) {
+      setGlobalError(
+        `Authentication error (${authError.replace(/_/g, " ")}). Please try again.`,
+      );
+    }
+  }, []);
 
   // Client-side safety net: already-signed-in visitors leave /login
   const { data: session, isPending } = useSession();
@@ -71,8 +98,8 @@ export default function LoginPage() {
         return;
       }
 
-      // If successful, push them to the Home page
-      router.push("/");
+      router.push(redirectTo);
+      router.refresh();
     } catch {
       setGlobalError("A network error occurred. Please try again.");
     } finally {
@@ -80,15 +107,16 @@ export default function LoginPage() {
     }
   }
 
-  // Google OAuth via BetterAuth's social sign-in
   async function handleGoogleSignIn() {
     setGlobalError("");
     setIsGoogleLoading(true);
 
     try {
+      const origin = window.location.origin;
       const { error } = await signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3000/",
+        callbackURL: `${origin}${redirectTo}`,
+        errorCallbackURL: `${origin}/login`,
       });
 
       if (error) {
@@ -96,9 +124,6 @@ export default function LoginPage() {
         setIsGoogleLoading(false);
         return;
       }
-
-      // On success Better Auth redirects the browser to Google,
-      // so the loading state is intentionally kept until navigation.
     } catch {
       setGlobalError("A network error occurred. Please try again.");
       setIsGoogleLoading(false);
@@ -142,7 +167,16 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Password</FormLabel>
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotNotice((prev) => !prev)}
+                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
                     <FormControl>
                       <Input
                         type="password"
@@ -150,6 +184,19 @@ export default function LoginPage() {
                         {...field}
                       />
                     </FormControl>
+                    {showForgotNotice && (
+                      <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
+                        <span>{FORGOT_NOTICE}</span>
+                        <button
+                          type="button"
+                          aria-label="Dismiss password reset notice"
+                          onClick={() => setShowForgotNotice(false)}
+                          className="shrink-0 font-semibold text-foreground hover:text-indigo-600"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -211,7 +258,7 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="flex justify-center border-t p-6">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/register"
               className="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
@@ -222,5 +269,19 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 bg-background">
+          <div className="h-10 w-64 animate-pulse rounded-md bg-muted" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

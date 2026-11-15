@@ -10,14 +10,17 @@ import { Input } from "@/components/ui/input";
 const QUICK_LINKS = [
   { name: "Home", href: "/" },
   { name: "Explore Studios", href: "/studios" },
+  { name: "How it works", href: "/#how-it-works" },
   { name: "About Us", href: "/#about-us" },
-  { name: "Contact", href: "/#contact" },
 ];
 
 const CATEGORY_LINKS = [
-  { name: "Photo Studios", href: "/studios?category=photo-studios" },
-  { name: "Sound Stages", href: "/studios?category=sound-stages" },
-  { name: "Podcast Rooms", href: "/studios?category=podcast-rooms" },
+  { name: "Photography", href: "/studios?category=Photography" },
+  { name: "Podcast", href: "/studios?category=Podcast" },
+  { name: "Music", href: "/studios?category=Music" },
+  { name: "Film", href: "/studios?category=Film" },
+  { name: "Dance", href: "/studios?category=Dance" },
+  { name: "Art", href: "/studios?category=Art" },
 ];
 
 export function Footer() {
@@ -83,7 +86,7 @@ export function Footer() {
             <h3 className="font-heading font-semibold text-base tracking-tight">
               Categories
             </h3>
-            <ul className="flex flex-col gap-2.5">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5">
               {CATEGORY_LINKS.map((category) => (
                 <li key={category.name}>
                   <Link

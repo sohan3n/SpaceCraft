@@ -28,13 +28,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { signIn, signUp, useSession } from "@/lib/auth-client";
 
-// 1. Define the strict validation schema
 const registerSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  name: z
+    .string()
+    .trim()
+    .min(2, { message: "Name must be at least 2 characters." }),
+  email: z
+    .string()
+    .trim()
+    .email({ message: "Please enter a valid email address." }),
+  photoUrl: z.string().trim().url({
+    message:
+      "Please enter a valid image URL (starting with http:// or https://).",
+  }),
   password: z
     .string()
-    .min(6, { message: "Password must be at least 6 characters." }),
+    .min(6, { message: "Password must be at least 6 characters long." })
+    .regex(/[A-Z]/, {
+      message: "Password must contain at least one uppercase letter.",
+    })
+    .regex(/[a-z]/, {
+      message: "Password must contain at least one lowercase letter.",
+    }),
 });
 
 export default function RegisterPage() {
@@ -51,17 +66,16 @@ export default function RegisterPage() {
     }
   }, [isPending, session, router]);
 
-  // 2. Initialize the form
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
+      photoUrl: "",
       password: "",
     },
   });
 
-  // 3. Handle the submission to the Express backend
   async function onSubmit(values: z.infer<typeof registerSchema>) {
     setIsLoading(true);
     setGlobalError("");
@@ -71,6 +85,7 @@ export default function RegisterPage() {
         email: values.email,
         password: values.password,
         name: values.name,
+        image: values.photoUrl,
       });
 
       if (error) {
@@ -81,7 +96,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // If successful, push them to the login page
       router.push("/login");
     } catch {
       setGlobalError("A network error occurred. Please try again.");
@@ -90,15 +104,16 @@ export default function RegisterPage() {
     }
   }
 
-  // Google OAuth via BetterAuth's social sign-in
   async function handleGoogleSignIn() {
     setGlobalError("");
     setIsGoogleLoading(true);
 
     try {
+      const origin = window.location.origin;
       const { error } = await signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3000/",
+        callbackURL: `${origin}/`,
+        errorCallbackURL: `${origin}/register`,
       });
 
       if (error) {
@@ -106,9 +121,6 @@ export default function RegisterPage() {
         setIsGoogleLoading(false);
         return;
       }
-
-      // On success Better Auth redirects the browser to Google,
-      // so the loading state is intentionally kept until navigation.
     } catch {
       setGlobalError("A network error occurred. Please try again.");
       setIsGoogleLoading(false);
@@ -163,6 +175,24 @@ export default function RegisterPage() {
 
               <FormField
                 control={form.control}
+                name="photoUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Photo URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="url"
+                        placeholder="https://example.com/avatar.jpg"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
@@ -174,6 +204,10 @@ export default function RegisterPage() {
                         {...field}
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Must be at least 6 characters with at least 1 uppercase
+                      and 1 lowercase letter.
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
