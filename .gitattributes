@@ -1,0 +1,5 @@
+# Biome's formatter (see biome.json) expects LF endings. This repo is
+# developed on Windows where core.autocrlf=true would otherwise re-introduce
+# CRLF on every checkout, making `npm run lint` fail on formatting forever.
+# The repository already stores LF, so this only pins the working copy.
+* text=auto eol=lf

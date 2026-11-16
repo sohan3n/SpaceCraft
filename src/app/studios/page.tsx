@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Building2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Building2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import { Suspense, useEffect, useState } from "react";
+import { type Studio, StudioCard } from "@/components/StudioCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { StudioCard, type Studio } from "@/components/StudioCard";
+import { API_BASE_URL } from "@/lib/api";
 
 const CATEGORIES = [
   "All",
@@ -21,7 +22,7 @@ const CATEGORIES = [
 function normalizeCategory(raw: string | null): string {
   if (!raw) return "All";
   const matched = CATEGORIES.find(
-    (cat) => cat.toLowerCase() === raw.trim().toLowerCase()
+    (cat) => cat.toLowerCase() === raw.trim().toLowerCase(),
   );
   return matched || "All";
 }
@@ -68,10 +69,8 @@ function StudiosCatalogContent() {
           params.set("search", debouncedSearch.trim());
         }
 
-        const apiBase =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         const queryString = params.toString();
-        const url = `${apiBase}/api/studios${
+        const url = `${API_BASE_URL}/api/studios${
           queryString ? `?${queryString}` : ""
         }`;
 
@@ -139,7 +138,8 @@ function StudiosCatalogContent() {
               Explore Creative Studios
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Browse verified photography stages, recording booths, and production spaces.
+              Browse verified photography stages, recording booths, and
+              production spaces.
             </p>
           </div>
           <Link href="/add-studio">
@@ -246,7 +246,8 @@ function StudiosCatalogContent() {
               No matching studios found
             </h2>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
-              Try adjusting your search keywords or switching back to all categories.
+              Try adjusting your search keywords or switching back to all
+              categories.
             </p>
             <Button variant="outline" onClick={clearFilters} className="mt-5">
               Clear Filters

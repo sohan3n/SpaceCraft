@@ -3,9 +3,9 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+import { Suspense } from "react";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { Suspense } from "react";
 
 // 1. Configure standard body font
 const inter = Inter({
@@ -20,7 +20,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "StudioSpace | Peer-to-Peer Creative Workspaces",
+  title: "StudioCraft | Peer-to-Peer Creative MarketPlace",
   description: "Discover and book photography, film, and podcast studios.",
 };
 

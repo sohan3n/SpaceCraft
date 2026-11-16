@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { ArrowRight, Building2 } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { type Studio, StudioCard } from "@/components/StudioCard";
 import { Button } from "@/components/ui/button";
-import { StudioCard, type Studio } from "@/components/StudioCard";
+import { API_BASE_URL } from "@/lib/api";
 
 export function FeaturedStudios() {
   const [studios, setStudios] = useState<Studio[]>([]);
@@ -13,7 +14,7 @@ export function FeaturedStudios() {
   useEffect(() => {
     async function loadFeaturedStudios() {
       try {
-        const res = await fetch("http://localhost:5000/api/studios?limit=6");
+        const res = await fetch(`${API_BASE_URL}/api/studios?limit=6`);
         const data = await res.json();
         if (data.success && Array.isArray(data.studios)) {
           setStudios(data.studios);
@@ -38,7 +39,8 @@ export function FeaturedStudios() {
               Featured Studios
             </h2>
             <p className="mt-2 text-muted-foreground">
-              Handpicked creative spaces ready for your next shoot, session, or recording.
+              Handpicked creative spaces ready for your next shoot, session, or
+              recording.
             </p>
           </div>
           <Link href="/studios">
@@ -73,7 +75,9 @@ export function FeaturedStudios() {
           /* Empty State */
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-12 text-center">
             <Building2 className="h-10 w-10 text-muted-foreground mb-3" />
-            <h3 className="font-heading text-lg font-semibold">No studios listed yet</h3>
+            <h3 className="font-heading text-lg font-semibold">
+              No studios listed yet
+            </h3>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
               Be the first host to list a creative workspace on SpaceCraft.
             </p>

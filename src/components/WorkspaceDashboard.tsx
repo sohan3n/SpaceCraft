@@ -27,9 +27,8 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui/card";
+import { API_BASE_URL } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export type DashboardTab = "studios" | "requests" | "bookings";
 
@@ -146,13 +145,13 @@ export function WorkspaceDashboard({
       setIsLoading(true);
       try {
         const [studiosRes, hostBookingsRes, myBookingsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/studios/host/me`, {
+          fetch(`${API_BASE_URL}/api/studios/host/me`, {
             credentials: "include",
           }),
-          fetch(`${API_BASE}/api/bookings/host`, {
+          fetch(`${API_BASE_URL}/api/bookings/host`, {
             credentials: "include",
           }),
-          fetch(`${API_BASE}/api/bookings/me`, {
+          fetch(`${API_BASE_URL}/api/bookings/me`, {
             credentials: "include",
           }),
         ]);
@@ -202,7 +201,7 @@ export function WorkspaceDashboard({
     setDeletingId(studioId);
 
     try {
-      const res = await fetch(`${API_BASE}/api/studios/${studioId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/studios/${studioId}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -234,7 +233,7 @@ export function WorkspaceDashboard({
     setUpdatingBookingId(bookingId);
 
     try {
-      const res = await fetch(`${API_BASE}/api/bookings/${bookingId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -274,7 +273,7 @@ export function WorkspaceDashboard({
     setDeletingBookingId(bookingId);
 
     try {
-      const res = await fetch(`${API_BASE}/api/bookings/${bookingId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`, {
         method: "DELETE",
         credentials: "include",
       });

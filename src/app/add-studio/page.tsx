@@ -1,30 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useSession } from "@/lib/auth-client";
-
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   ArrowLeft,
   Building2,
@@ -35,6 +11,30 @@ import {
   MapPin,
   Users,
 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { API_BASE_URL } from "@/lib/api";
+import { useSession } from "@/lib/auth-client";
 
 const STUDIO_CATEGORIES = [
   "Photography",
@@ -62,15 +62,13 @@ const addStudioSchema = z.object({
   title: z
     .string()
     .min(3, { message: "Studio title must be at least 3 characters." }),
-  category: z
-    .string()
-    .min(1, { message: "Please select a studio category." }),
+  category: z.string().min(1, { message: "Please select a studio category." }),
   location: z
     .string()
     .min(3, { message: "Please enter a city or neighborhood." }),
-  description: z
-    .string()
-    .min(20, { message: "Describe your space and equipment in at least 20 characters." }),
+  description: z.string().min(20, {
+    message: "Describe your space and equipment in at least 20 characters.",
+  }),
   hourlyRate: z
     .string()
     .refine((val) => !Number.isNaN(Number(val)) && Number(val) > 0, {
@@ -86,7 +84,7 @@ const addStudioSchema = z.object({
     .optional()
     .refine(
       (val) => !val || val.trim() === "" || /^https?:\/\/.+/.test(val.trim()),
-      { message: "Please enter a valid http:// or https:// image URL." }
+      { message: "Please enter a valid http:// or https:// image URL." },
     ),
 });
 
@@ -131,7 +129,7 @@ export default function AddStudioPage() {
     setSelectedAmenities((prev) =>
       prev.includes(amenity)
         ? prev.filter((item) => item !== amenity)
-        : [...prev, amenity]
+        : [...prev, amenity],
     );
   }
 
@@ -140,7 +138,7 @@ export default function AddStudioPage() {
     setGlobalError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/studios", {
+      const response = await fetch(`${API_BASE_URL}/api/studios`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -169,7 +167,9 @@ export default function AddStudioPage() {
       router.push("/studios");
       router.refresh();
     } catch {
-      setGlobalError("Network error: Could not connect to the SpaceCraft server.");
+      setGlobalError(
+        "Network error: Could not connect to the SpaceCraft server.",
+      );
       setIsSubmitting(false);
     }
   }
@@ -191,7 +191,11 @@ export default function AddStudioPage() {
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
           <Link href="/">
-            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-muted-foreground"
+            >
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
@@ -208,14 +212,17 @@ export default function AddStudioPage() {
               List Your Studio Space
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Publish your creative workspace on SpaceCraft so photographers, musicians,
-              and content creators can book by the hour.
+              Publish your creative workspace on SpaceCraft so photographers,
+              musicians, and content creators can book by the hour.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="pt-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
                 {/* Title */}
                 <FormField
                   control={form.control}
@@ -400,7 +407,8 @@ export default function AddStudioPage() {
                         </div>
                       </FormControl>
                       <p className="text-xs text-muted-foreground">
-                        Leave blank to automatically use a default studio cover photo.
+                        Leave blank to automatically use a default studio cover
+                        photo.
                       </p>
                       <FormMessage />
                     </FormItem>
@@ -409,6 +417,7 @@ export default function AddStudioPage() {
 
                 {isValidPreviewUrl && !previewBroken && (
                   <div className="overflow-hidden rounded-lg border border-border bg-muted/30">
+                    {/* biome-ignore lint/performance/noImgElement: Live preview of an arbitrary user-supplied URL — next/image would require allowlisting every image host. */}
                     <img
                       src={watchedImageUrl}
                       alt="Studio preview"
@@ -426,7 +435,11 @@ export default function AddStudioPage() {
 
                 <div className="flex items-center justify-end gap-3 border-t pt-6">
                   <Link href="/">
-                    <Button type="button" variant="outline" disabled={isSubmitting}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isSubmitting}
+                    >
                       Cancel
                     </Button>
                   </Link>

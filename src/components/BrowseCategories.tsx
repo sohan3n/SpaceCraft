@@ -1,13 +1,13 @@
-import Link from "next/link";
 import {
+  ArrowRight,
   Camera,
+  Film,
   Mic,
   Music,
-  Film,
-  Sparkles,
   Palette,
-  ArrowRight,
+  Sparkles,
 } from "lucide-react";
+import Link from "next/link";
 
 const CATEGORIES = [
   {

@@ -1,21 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
-import type { Studio } from "@/components/StudioCard";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   ArrowLeft,
   Building2,
@@ -29,6 +13,22 @@ import {
   Star,
   Users,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { Studio } from "@/components/StudioCard";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { API_BASE_URL } from "@/lib/api";
+import { useSession } from "@/lib/auth-client";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=1200&q=80";
@@ -86,7 +86,7 @@ export default function StudioDetailsPage() {
       setNotFoundError(false);
 
       try {
-        const res = await fetch(`http://localhost:5000/api/studios/${studioId}`);
+        const res = await fetch(`${API_BASE_URL}/api/studios/${studioId}`);
         const data = await res.json();
 
         if (!res.ok || !data.success || !data.studio) {
@@ -116,7 +116,7 @@ export default function StudioDetailsPage() {
     setIsBooking(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/bookings", {
+      const response = await fetch(`${API_BASE_URL}/api/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +133,7 @@ export default function StudioDetailsPage() {
       const contentType = response.headers.get("content-type") || "";
       if (!contentType.includes("application/json")) {
         setBookingError(
-          "Booking API is not active yet. We will enable live reservations in the next step."
+          "Booking API is not active yet. We will enable live reservations in the next step.",
         );
         setIsBooking(false);
         return;
@@ -147,12 +147,16 @@ export default function StudioDetailsPage() {
         return;
       }
 
-      setBookingSuccess("Reservation request submitted! Redirecting to your dashboard...");
+      setBookingSuccess(
+        "Reservation request submitted! Redirecting to your dashboard...",
+      );
       setTimeout(() => {
         router.push("/my-studios");
       }, 1200);
     } catch {
-      setBookingError("Network error: Unable to connect to the booking server.");
+      setBookingError(
+        "Network error: Unable to connect to the booking server.",
+      );
       setIsBooking(false);
     }
   }
@@ -187,7 +191,8 @@ export default function StudioDetailsPage() {
               Studio Not Found
             </CardTitle>
             <CardDescription>
-              This space may have been removed by its host or the link is invalid.
+              This space may have been removed by its host or the link is
+              invalid.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -203,7 +208,9 @@ export default function StudioDetailsPage() {
   }
 
   const totalPrice = studio.hourlyRate * hours;
-  const isOwner = Boolean(session?.user?.id && session.user.id === studio.hostId);
+  const isOwner = Boolean(
+    session?.user?.id && session.user.id === studio.hostId,
+  );
   const hostInitial = (studio.hostName || "H").charAt(0).toUpperCase();
 
   return (
@@ -212,7 +219,11 @@ export default function StudioDetailsPage() {
         {/* Top Back Navigation */}
         <div>
           <Link href="/studios">
-            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-muted-foreground"
+            >
               <ArrowLeft className="h-4 w-4" />
               Back to Studios
             </Button>
@@ -276,13 +287,16 @@ export default function StudioDetailsPage() {
 
               <div className="inline-flex items-center gap-2 rounded-lg bg-muted/60 px-3.5 py-2 text-sm font-medium">
                 <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                Up to {studio.capacity} {studio.capacity === 1 ? "person" : "people"}
+                Up to {studio.capacity}{" "}
+                {studio.capacity === 1 ? "person" : "people"}
               </div>
             </div>
 
             {/* About This Space */}
             <div className="space-y-3 rounded-2xl border bg-card p-6 shadow-sm">
-              <h2 className="font-heading text-xl font-bold">About This Space</h2>
+              <h2 className="font-heading text-xl font-bold">
+                About This Space
+              </h2>
               <p className="whitespace-pre-line leading-relaxed text-muted-foreground">
                 {studio.description}
               </p>
@@ -292,7 +306,9 @@ export default function StudioDetailsPage() {
             <div className="space-y-4 rounded-2xl border bg-card p-6 shadow-sm">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                <h2 className="font-heading text-xl font-bold">Included Amenities</h2>
+                <h2 className="font-heading text-xl font-bold">
+                  Included Amenities
+                </h2>
               </div>
 
               {studio.amenities && studio.amenities.length > 0 ? (
@@ -324,7 +340,9 @@ export default function StudioDetailsPage() {
                     <span className="font-heading text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                       ${studio.hourlyRate}
                     </span>
-                    <span className="ml-1 text-sm text-muted-foreground">/ hour</span>
+                    <span className="ml-1 text-sm text-muted-foreground">
+                      / hour
+                    </span>
                   </div>
                   <span className="rounded-md bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                     Instant Request
@@ -406,13 +424,16 @@ export default function StudioDetailsPage() {
                   <div className="space-y-2 rounded-xl bg-muted/40 p-4 text-sm">
                     <div className="flex items-center justify-between text-muted-foreground">
                       <span>
-                        ${studio.hourlyRate} × {hours} {hours === 1 ? "hour" : "hours"}
+                        ${studio.hourlyRate} × {hours}{" "}
+                        {hours === 1 ? "hour" : "hours"}
                       </span>
                       <span>${totalPrice}</span>
                     </div>
                     <div className="flex items-center justify-between text-muted-foreground">
                       <span>Platform service fee</span>
-                      <span className="text-emerald-600 dark:text-emerald-400">$0</span>
+                      <span className="text-emerald-600 dark:text-emerald-400">
+                        $0
+                      </span>
                     </div>
                     <div className="flex items-center justify-between border-t border-border pt-2.5 text-base font-bold">
                       <span>Total</span>
@@ -452,7 +473,11 @@ export default function StudioDetailsPage() {
                   ) : isOwner ? (
                     <div className="space-y-2">
                       <Link href="/my-studios" className="block">
-                        <Button type="button" variant="outline" className="w-full">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                        >
                           Manage Your Listing
                         </Button>
                       </Link>

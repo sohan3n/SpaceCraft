@@ -1,6 +1,6 @@
+import { MapPin, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface Studio {
@@ -80,10 +80,15 @@ export function StudioCard({
             <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
               ${price}
             </span>
-            <span className="text-xs font-medium text-muted-foreground">/ hr</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              / hr
+            </span>
           </div>
           <Link href={`/studios/${id}`}>
-            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+            <Button
+              size="sm"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
               View Details
             </Button>
           </Link>
